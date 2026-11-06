@@ -43,3 +43,20 @@
     <label for="en_text" class="form-label">Full Text (EN)</label>
     <textarea id="en_text" name="en_text" class="form-control" rows="5">{{ old('en_text', $en->text ?? '') }}</textarea>
 </div>
+
+<div class="mb-3">
+    <label for="teams_select" class="form-label">Пов'язані клуби (N:N)</label>
+    <select id="teams_select" name="teams[]" multiple class="form-control">
+        @foreach ($teams as $id => $name)
+            <option value="{{ $id }}" @selected(in_array($id, old('teams', $selectedTeams ?? [])))>
+                {{ $name }}
+            </option>
+        @endforeach
+    </select>
+    @error('teams')
+    <div class="text-danger mt-1">{{ $message }}</div>
+    @enderror
+    @error('teams.*')
+    <div class="text-danger mt-1">{{ $message }}</div>
+    @enderror
+</div>

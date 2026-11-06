@@ -22,6 +22,11 @@ Route::get('/stats/clubs', [StatsController::class, 'clubStats'])->name('stats.c
 // Маршрути блогу
 // Маршрут /blog/admin має бути ПЕРЕД resource, інакше його перехопить blog/{blog} (show)
 Route::get('/blog/admin', [BlogController::class, 'admin'])->name('blog.admin');
+
+// Керування командами (клубами) новини
+Route::get('/blog/{blog}/teams', [BlogController::class, 'teamsEdit'])->name('blog.teams');
+Route::post('/blog/{blog}/teams', [BlogController::class, 'teamsStore'])->name('blog.teams.store');
+
 Route::resource('blog', BlogController::class);
 
 // Сторінка контактів

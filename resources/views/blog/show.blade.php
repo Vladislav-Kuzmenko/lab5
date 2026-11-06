@@ -19,6 +19,15 @@
                     <span class="text-muted">{{ $blog->dt_created->format('d.m.Y H:i') }}</span>
                 </div>
                 <h1 class="mb-3">{{ $blog->getTranslatedAttribute('title', $lang) }}</h1>
+
+                @if ($blog->teams->isNotEmpty())
+                    <div class="mb-4">
+                        @foreach ($blog->teams as $team)
+                            <span class="badge bg-primary fs-6 me-2">⚽ {{ $team->name }}</span>
+                        @endforeach
+                    </div>
+                @endif
+
                 <p class="lead text-secondary">{{ $blog->getTranslatedAttribute('description', $lang) }}</p>
                 <hr>
                 <div class="fs-5">

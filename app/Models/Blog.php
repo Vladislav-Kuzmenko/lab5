@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Blog extends Model
 {
@@ -37,7 +38,11 @@ class Blog extends Model
         return $this->hasMany(BlogTranslation::class, 'blog_id', 'blog_id');
     }
 
-    // Хелпер для отримання локалізованого тексту з фолбеком на замовчуванням
+    public function teams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'blog_team', 'blog_id', 'team_id');
+    }
+
     public function getTranslatedAttribute(string $field, string $locale = 'uk')
     {
         $translation = $this->translations->firstWhere('locale', $locale);

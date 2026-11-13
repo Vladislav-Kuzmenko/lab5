@@ -6,6 +6,8 @@
     <title>@yield('title', 'Довідник')</title>
     <!-- Підключення Bootstrap 5 через CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery + Select2 (збірка Vite) -->
+    @vite(['resources/js/app.js'])
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
 <!-- Навігаційна панель (Navbar) -->

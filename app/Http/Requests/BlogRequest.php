@@ -21,6 +21,8 @@ class BlogRequest extends FormRequest
             'en_title' => ['nullable', 'string', 'max:200'],
             'en_description' => ['nullable', 'string', 'max:500'],
             'en_text' => ['nullable', 'string'],
+            'teams' => ['sometimes', 'array'],
+            'teams.*' => ['integer', 'distinct', 'exists:teams,id'],
         ];
     }
 }

@@ -14,6 +14,19 @@
         <p class="card-text text-secondary flex-grow-1">
             {{ \Illuminate\Support\Str::limit($blog->getTranslatedAttribute('description', $lang), 120) }}
         </p>
+
+        <div class="mt-2">
+            @if($blog->teams_count > 0)
+                <small class="text-muted">Згадані клуби ({{ $blog->teams_count }}):
+                    @foreach($blog->teams as $team)
+                        <span class="badge bg-secondary">{{ $team->name }}</span>
+                    @endforeach
+                </small>
+            @else
+                <small class="text-muted">Клубів не вказано</small>
+            @endif
+        </div>
+
         <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
             <small class="text-muted">Автор: {{ $blog->author?->name ?? 'Редакція' }}</small>
             <a href="{{ route('blog.show', [$blog, 'lang' => $lang]) }}" class="btn btn-sm btn-outline-primary">Читати далі →</a>

@@ -4,16 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\BlogRequest;
 use App\Models\Blog;
-use App\Models\Category;
 use App\Models\BlogTranslation;
+use App\Models\Category;
+use App\Models\Team;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class BlogController extends Controller
 {
     public function index(Request $request)
     {
         $lang = $request->get('lang', 'uk');
-        $blogs = Blog::with(['category', 'author', 'translations'])
+        $blogs = Blog::with(['category', 'author', 'translations', 'teams'])
+            ->withCount('teams') // кількість клубів у $blog->teams_count
             ->orderByDesc('dt_created')
             ->paginate(6)
             ->withQueryString();
@@ -32,84 +35,126 @@ class BlogController extends Controller
 
     public function create()
     {
-        $categories = Category::orderBy('category_name')->pluck('category_name', 'category_id');
-        return view('blog.create', compact('categories'));
+        return view('blog.create', [
+            'categories' => Category::orderBy('category_name')->pluck('category_name', 'category_id'),
+            'teams' => Team::orderBy('name')->pluck('name', 'id'),
+            'selectedTeams' => [],
+        ]);
     }
 
     public function store(BlogRequest $request)
     {
-        $blog = Blog::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'text' => $request->text,
-            'category_id' => $request->category_id,
-            'user_id' => auth()->id(),
-        ]);
+        $data = $request->validated();
+
+        // Лише поля таблиці blog: en_* та teams у неї не належать
+        $blog = Blog::create(
+            Arr::only($data, ['title', 'description', 'text', 'category_id'])
+            + ['user_id' => auth()->id()]
+        );
+
+        // Зв'язки N:N
+        $blog->teams()->sync($data['teams'] ?? []);
 
         BlogTranslation::create([
             'blog_id' => $blog->blog_id,
             'locale' => 'uk',
-            'title' => $request->title,
-            'description' => $request->description,
-            'text' => $request->text,
+            'title' => $data['title'],
+            'description' => $data['description'] ?? null,
+            'text' => $data['text'] ?? null,
         ]);
 
-        if ($request->filled('en_title')) {
+        if (!empty($data['en_title'])) {
             BlogTranslation::create([
                 'blog_id' => $blog->blog_id,
                 'locale' => 'en',
-                'title' => $request->en_title,
-                'description' => $request->en_description,
-                'text' => $request->en_text,
+                'title' => $data['en_title'],
+                'description' => $data['en_description'] ?? null,
+                'text' => $data['en_text'] ?? null,
             ]);
         }
 
-        return redirect()->route('blog.show', $blog);
+        return redirect()->route('blog.admin')->with('success', 'Новину створено!');
     }
 
     public function show(Blog $blog, Request $request)
     {
         $lang = $request->get('lang', 'uk');
-        $blog->load(['category', 'author', 'translations']);
+        $blog->load(['category', 'author', 'translations', 'teams']);
+
         return view('blog.show', compact('blog', 'lang'));
     }
 
     public function edit(Blog $blog)
     {
-        $blog->load('translations');
-        $categories = Category::orderBy('category_name')->pluck('category_name', 'category_id');
-        $en = $blog->translations->firstWhere('locale', 'en');
+        $blog->load(['translations', 'teams']);
 
-        return view('blog.edit', compact('blog', 'categories', 'en'));
+        return view('blog.edit', [
+            'blog' => $blog,
+            'en' => $blog->translations->firstWhere('locale', 'en'),
+            'categories' => Category::orderBy('category_name')->pluck('category_name', 'category_id'),
+            'teams' => Team::orderBy('name')->pluck('name', 'id'),
+            'selectedTeams' => $blog->teams->pluck('id')->all(),
+        ]);
     }
 
     public function update(BlogRequest $request, Blog $blog)
     {
-        $blog->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'text' => $request->text,
-            'category_id' => $request->category_id,
-        ]);
+        $data = $request->validated();
+
+        // Оновлюємо основні дані
+        $blog->update(Arr::only($data, ['title', 'description', 'text', 'category_id']));
+
+        // Синхронізуємо команди (зайві видаляться, нові додадуться)
+        $blog->teams()->sync($data['teams'] ?? []);
 
         BlogTranslation::updateOrCreate(
             ['blog_id' => $blog->blog_id, 'locale' => 'uk'],
-            ['title' => $request->title, 'description' => $request->description, 'text' => $request->text]
+            [
+                'title' => $data['title'],
+                'description' => $data['description'] ?? null,
+                'text' => $data['text'] ?? null,
+            ]
         );
 
-        if ($request->filled('en_title')) {
+        if (!empty($data['en_title'])) {
             BlogTranslation::updateOrCreate(
                 ['blog_id' => $blog->blog_id, 'locale' => 'en'],
-                ['title' => $request->en_title, 'description' => $request->en_description, 'text' => $request->en_text]
+                [
+                    'title' => $data['en_title'],
+                    'description' => $data['en_description'] ?? null,
+                    'text' => $data['en_text'] ?? null,
+                ]
             );
         }
 
-        return redirect()->route('blog.admin')->with('success', 'Запис успішно оновлено!');
+        return redirect()->route('blog.admin')->with('success', 'Новину оновлено!');
+    }
+
+    public function teamsEdit(Blog $blog)
+    {
+        return view('blog.teams', [
+            'blog' => $blog,
+            'teams' => Team::orderBy('name')->pluck('name', 'id'),
+            'selectedTeams' => $blog->teams()->pluck('teams.id')->all(),
+        ]);
+    }
+
+    public function teamsStore(Request $request, Blog $blog)
+    {
+        $data = $request->validate([
+            'teams' => ['sometimes', 'array'],
+            'teams.*' => ['integer', 'distinct', 'exists:teams,id'],
+        ]);
+
+        $blog->teams()->sync($data['teams'] ?? []);
+
+        return redirect()->route('blog.show', $blog)->with('success', 'Зв\'язки клубів оновлено!');
     }
 
     public function destroy(Blog $blog)
     {
         $blog->delete();
+
         return redirect()->route('blog.admin')->with('success', 'Запис видалено!');
     }
 }

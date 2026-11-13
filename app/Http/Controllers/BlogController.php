@@ -7,6 +7,7 @@ use App\Models\Blog;
 use App\Models\BlogTranslation;
 use App\Models\Category;
 use App\Models\Team;
+use App\Queries\BlogFilter; // Додано для ЛР7[cite: 26]
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
@@ -24,13 +25,27 @@ class BlogController extends Controller
         return view('blog.index', compact('blogs', 'lang'));
     }
 
-    public function admin()
+    // Оновлений метод admin() для ЛР7[cite: 17, 26]
+    public function admin(Request $request, BlogFilter $filter)
     {
-        $blogs = Blog::with('category')
-            ->orderByDesc('dt_created')
-            ->paginate(10);
+        // Валідація вхідних GET-параметрів[cite: 26, 27]
+        $input = $request->validate([
+            'title'       => ['nullable', 'string', 'max:200'],
+            'category_id' => ['nullable', 'integer', 'exists:category,category_id'],
+            'team_id'     => ['nullable', 'integer', 'exists:teams,id'], // Перевірка існування клубу[cite: 27]
+            'sort'        => ['nullable', 'string', 'max:30'],
+        ]);
 
-        return view('blog.admin', compact('blogs'));
+        // Отримання відфільтрованих та відсортованих новин із збереженням параметрів пагінації[cite: 27, 33]
+        $blogs = $filter->apply($input)
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('blog.admin', [
+            'blogs'      => $blogs,
+            'categories' => Category::orderBy('category_name')->pluck('category_name', 'category_id'),
+            'teams'      => Team::orderBy('name')->pluck('name', 'id'), // Дані для випадаючого списку клубів УПЛ
+        ]);
     }
 
     public function create()

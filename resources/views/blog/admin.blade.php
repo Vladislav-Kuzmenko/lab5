@@ -12,6 +12,11 @@
             </div>
 
             <div>
+                <label for="categoryName" class="form-label">Назва категорії</label>
+                <input type="text" class="form-control" id="categoryName" name="categoryName" value="{{ request('categoryName') }}" placeholder="Назва категорії...">
+            </div>
+
+            <div>
                 <label for="category_id" class="form-label">Категорія</label>
                 <select id="category_id" name="category_id" class="form-select" onchange="this.form.submit()">
                     <option value="">Усі категорії</option>

@@ -30,10 +30,11 @@ class BlogController extends Controller
     {
         // Валідація вхідних GET-параметрів[cite: 26, 27]
         $input = $request->validate([
-            'title'       => ['nullable', 'string', 'max:200'],
-            'category_id' => ['nullable', 'integer', 'exists:category,category_id'],
-            'team_id'     => ['nullable', 'integer', 'exists:teams,id'], // Перевірка існування клубу[cite: 27]
-            'sort'        => ['nullable', 'string', 'max:30'],
+            'title'        => ['nullable', 'string', 'max:200'],
+            'categoryName' => ['nullable', 'string', 'max:100'], // Додано це поле[cite: 27]
+            'category_id'  => ['nullable', 'integer', 'exists:category,category_id'],
+            'team_id'      => ['nullable', 'integer', 'exists:teams,id'], // Перевірка існування клубу[cite: 27]
+            'sort'         => ['nullable', 'string', 'max:30'],
         ]);
 
         // Отримання відфільтрованих та відсортованих новин із збереженням параметрів пагінації[cite: 27, 33]

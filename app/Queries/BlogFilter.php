@@ -30,6 +30,12 @@ class BlogFilter
             fn (Builder $q, $value) => $q->where('blog.title', 'like', "%{$value}%")
         );
 
+        // Фільтрація за назвою категорії (текстовий пошук)[cite: 25]
+        $query->when(
+            $input['categoryName'] ?? null,
+            fn (Builder $q, $value) => $q->where('category.category_name', 'like', "%{$value}%")
+        );
+
         // Фільтрація за вибраною категорією[cite: 25]
         $query->when(
             $input['category_id'] ?? null,

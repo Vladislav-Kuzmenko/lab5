@@ -4,7 +4,6 @@
     <div class="container">
         <h2>Адміністрування публікацій (Довідник УПЛ)</h2>
 
-        <!-- Форма пошуку та фільтрації[cite: 30, 31, 33] -->
         <form method="GET" action="{{ route('blog.admin') }}" class="mb-4 d-flex gap-3 align-items-end">
             <div>
                 <label for="title" class="form-label">Заголовок</label>
@@ -36,7 +35,6 @@
                 </select>
             </div>
 
-            <!-- Збереження поточного сортування при пошуку[cite: 31] -->
             <input type="hidden" name="sort" value="{{ request('sort') }}">
 
             <div>
@@ -45,11 +43,11 @@
             </div>
         </form>
 
-        <!-- Таблиця результатів[cite: 28, 29] -->
+        //Таблиця результатів
         <table class="table table-bordered table-striped">
             <thead>
             <tr>
-                <!-- Сортування за заголовком -->
+                //Сортування за заголовком
                 @php
                     $currentSort = request('sort');
                     $sortTitle = $currentSort === 'title' ? '-title' : 'title';
@@ -62,7 +60,7 @@
                     </a>
                 </th>
 
-                <!-- Сортування за пов'язаною таблицею (Категорія)[cite: 29, 33] -->
+                //Сортування за пов'язаною таблицею
                 <th>
                     <a href="{{ route('blog.admin', array_merge(request()->except('sort', 'page'), ['sort' => $sortCat])) }}">
                         Категорія @if($currentSort === 'categoryName') ↑ @elseif($currentSort === '-categoryName') ↓ @endif
@@ -71,7 +69,7 @@
 
                 <th>Клуби УПЛ (Зв'язок)</th>
 
-                <!-- Сортування за агрегованою кількістю (Інд. завдання)[cite: 33] -->
+                //Сортування за агрегованою кількістю
                 <th>
                     <a href="{{ route('blog.admin', array_merge(request()->except('sort', 'page'), ['sort' => $sortCount])) }}">
                         Кількість клубів @if($currentSort === 'teamsCount') ↑ @elseif($currentSort === '-teamsCount') ↓ @endif
@@ -105,7 +103,7 @@
             </tbody>
         </table>
 
-        <!-- Пагінація[cite: 27] -->
+        //Пагінація
         <div class="mt-3">
             {{ $blogs->links() }}
         </div>

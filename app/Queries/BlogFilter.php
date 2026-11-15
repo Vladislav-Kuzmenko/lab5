@@ -7,42 +7,42 @@ use Illuminate\Database\Eloquent\Builder;
 
 class BlogFilter
 {
-    // Дозволені поля для сортування (Білий список)[cite: 21, 24]
+    // Дозволені поля для сортування
     private const SORTABLE = [
         'title'        => 'blog.title',
-        'categoryName' => 'category.category_name', // Дані з пов'язаної таблиці[cite: 33]
-        'created'      => 'blog.dt_created', // Або 'created_at', залежно від ваших міграцій
-        'teamsCount'   => 'teams_count',     // Кількість пов'язаних записів (Інд. завдання)[cite: 33]
+        'categoryName' => 'category.category_name',
+        'created'      => 'blog.dt_created',
+        'teamsCount'   => 'teams_count',
     ];
 
     public function apply(array $input): Builder
     {
-        // Базовий запит з eager loading та підрахунком клубів[cite: 20, 33]
+        // Базовий запит з eager loading та підрахунком клубів
         $query = Blog::query()
-            ->with(['category', 'teams']) // Вирішення проблеми N+1[cite: 20]
-            ->withCount('teams')          // Підрахунок кількості клубів для сортування[cite: 33]
-            ->leftJoin('category', 'blog.category_id', '=', 'category.category_id') // JOIN для сортування за назвою[cite: 19, 24]
-            ->select('blog.*'); // Уникнення конфлікту колонок[cite: 20, 24]
+            ->with(['category', 'teams'])
+            ->withCount('teams')
+            ->leftJoin('category', 'blog.category_id', '=', 'category.category_id')
+            ->select('blog.*');
 
-        // Фільтрація за заголовком[cite: 24]
+        // Фільтрація за заголовком
         $query->when(
             $input['title'] ?? null,
             fn (Builder $q, $value) => $q->where('blog.title', 'like', "%{$value}%")
         );
 
-        // Фільтрація за назвою категорії (текстовий пошук)[cite: 25]
+        // Фільтрація за назвою категорії
         $query->when(
             $input['categoryName'] ?? null,
             fn (Builder $q, $value) => $q->where('category.category_name', 'like', "%{$value}%")
         );
 
-        // Фільтрація за вибраною категорією[cite: 25]
+        // Фільтрація за вибраною категорією
         $query->when(
             $input['category_id'] ?? null,
             fn (Builder $q, $value) => $q->where('blog.category_id', $value)
         );
 
-        // Фільтрація за футбольним клубом (зв'язок N:N)[cite: 25, 33]
+        // Фільтрація за футбольним клубом (зв'язок N:N)
         $query->when(
             $input['team_id'] ?? null,
             fn (Builder $q, $value) => $q->whereHas(
@@ -59,14 +59,14 @@ class BlogFilter
         $desc = str_starts_with($sort ?? '', '-');
         $field = $desc ? substr($sort, 1) : $sort;
 
-        // Сортування за замовчуванням[cite: 26]
+        // Сортування за замовчуванням
         if (!isset(self::SORTABLE[$field])) {
             return $query->orderByDesc('blog.dt_created')
-                ->orderByDesc('blog.blog_id'); // Виправлено на blog_id[cite: 18, 37]
+                ->orderByDesc('blog.blog_id');
         }
 
         return $query
             ->orderBy(self::SORTABLE[$field], $desc ? 'desc' : 'asc')
-            ->orderByDesc('blog.blog_id'); // Виправлено на blog_id[cite: 18, 37]
+            ->orderByDesc('blog.blog_id');
     }
 }

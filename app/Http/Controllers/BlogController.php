@@ -7,6 +7,7 @@ use App\Models\Blog;
 use App\Models\BlogTranslation;
 use App\Models\Category;
 use App\Models\Team;
+use App\Queries\BlogFilter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
@@ -24,13 +25,28 @@ class BlogController extends Controller
         return view('blog.index', compact('blogs', 'lang'));
     }
 
-    public function admin()
+    // Оновлений метод admin()
+    public function admin(Request $request, BlogFilter $filter)
     {
-        $blogs = Blog::with('category')
-            ->orderByDesc('dt_created')
-            ->paginate(10);
+        // Валідація вхідних GET-параметрів
+        $input = $request->validate([
+            'title'        => ['nullable', 'string', 'max:200'],
+            'categoryName' => ['nullable', 'string', 'max:100'],
+            'category_id'  => ['nullable', 'integer', 'exists:category,category_id'],
+            'team_id'      => ['nullable', 'integer', 'exists:teams,id'],
+            'sort'         => ['nullable', 'string', 'max:30'],
+        ]);
 
-        return view('blog.admin', compact('blogs'));
+        // Отримання відфільтрованих та відсортованих новин із збереженням параметрів пагінації
+        $blogs = $filter->apply($input)
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('blog.admin', [
+            'blogs'      => $blogs,
+            'categories' => Category::orderBy('category_name')->pluck('category_name', 'category_id'),
+            'teams'      => Team::orderBy('name')->pluck('name', 'id'),
+        ]);
     }
 
     public function create()
@@ -46,7 +62,6 @@ class BlogController extends Controller
     {
         $data = $request->validated();
 
-        // Лише поля таблиці blog: en_* та teams у неї не належать
         $blog = Blog::create(
             Arr::only($data, ['title', 'description', 'text', 'category_id'])
             + ['user_id' => auth()->id()]
@@ -101,10 +116,8 @@ class BlogController extends Controller
     {
         $data = $request->validated();
 
-        // Оновлюємо основні дані
         $blog->update(Arr::only($data, ['title', 'description', 'text', 'category_id']));
 
-        // Синхронізуємо команди (зайві видаляться, нові додадуться)
         $blog->teams()->sync($data['teams'] ?? []);
 
         BlogTranslation::updateOrCreate(

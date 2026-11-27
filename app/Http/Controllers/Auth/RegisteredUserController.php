@@ -42,6 +42,9 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        // Призначаємо роль автора новому користувачу
+        $user->assignRole('author');
+
         event(new Registered($user));
 
         Auth::login($user);

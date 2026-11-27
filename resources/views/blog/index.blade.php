@@ -3,6 +3,25 @@
 @section('title', 'Новини УПЛ')
 
 @section('content')
+    <style>
+        /* Пагінація: цифри зверху, текст "Showing..." під ними */
+        .pagination-stack nav > div:last-child {
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        .pagination-stack nav > div:last-child > div:last-child {
+            order: 1;
+        }
+        .pagination-stack nav > div:last-child > div:first-child {
+            order: 2;
+            margin-top: .5rem;
+        }
+        .pagination-stack nav p {
+            margin-bottom: 0;
+        }
+    </style>
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Новини та публікації UPL</h1>
         <div>
@@ -24,7 +43,7 @@
         @endforelse
     </div>
 
-    <div class="d-flex justify-content-center">
+    <div class="pagination-stack">
         {{ $blogs->links() }}
     </div>
 @endsection

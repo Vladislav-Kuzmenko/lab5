@@ -6,6 +6,7 @@ use App\Http\Controllers\FootballClubController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CabinetController;
 
 // Головна сторінка
 Route::get('/', function () {
@@ -29,7 +30,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/blog/{blog}/teams', [BlogController::class, 'teamsEdit'])->name('blog.teams');
     Route::post('/blog/{blog}/teams', [BlogController::class, 'teamsStore'])->name('blog.teams.store');
     Route::resource('blog', BlogController::class)->except(['index', 'show']);
+    Route::get('/cabinet', [CabinetController::class, 'index'])->name('cabinet');
+});
+
+// УПРАВЛІННЯ КОРИСТУВАЧАМИ (тільки admin)
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
 
 // ПУБЛІЧНІ МАРШРУТИ БЛОГУ

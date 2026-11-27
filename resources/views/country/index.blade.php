@@ -1,6 +1,24 @@
 @extends('layouts.app')
 
 @section('content')
+    <style>
+        .pagination-stack nav > div:last-child {
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        .pagination-stack nav > div:last-child > div:last-child {
+            order: 1;
+        }
+        .pagination-stack nav > div:last-child > div:first-child {
+            order: 2;
+            margin-top: .5rem;
+        }
+        .pagination-stack nav p {
+            margin-bottom: 0;
+        }
+    </style>
+
     <div class="card p-4 shadow-sm" style="background: #fff; border-radius: 8px;">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="m-0">Довідник країн</h2>
@@ -40,8 +58,8 @@
             </tbody>
         </table>
 
-        <div class="mt-3 d-flex justify-content-center">
-            {{ $countries->links('pagination::bootstrap-5') }}
+        <div class="pagination-stack mt-3">
+            {{ $countries->links() }}
         </div>
     </div>
 @endsection

@@ -43,11 +43,11 @@
             </div>
         </form>
 
-        //Таблиця результатів
+        {{-- Таблиця результатів --}}
         <table class="table table-bordered table-striped">
             <thead>
             <tr>
-                //Сортування за заголовком
+                {{-- Сортування за заголовком --}}
                 @php
                     $currentSort = request('sort');
                     $sortTitle = $currentSort === 'title' ? '-title' : 'title';
@@ -60,7 +60,7 @@
                     </a>
                 </th>
 
-                //Сортування за пов'язаною таблицею
+                {{-- Сортування за пов'язаною таблицею --}}
                 <th>
                     <a href="{{ route('blog.admin', array_merge(request()->except('sort', 'page'), ['sort' => $sortCat])) }}">
                         Категорія @if($currentSort === 'categoryName') ↑ @elseif($currentSort === '-categoryName') ↓ @endif
@@ -69,7 +69,7 @@
 
                 <th>Клуби УПЛ (Зв'язок)</th>
 
-                //Сортування за агрегованою кількістю
+                {{-- Сортування за агрегованою кількістю --}}
                 <th>
                     <a href="{{ route('blog.admin', array_merge(request()->except('sort', 'page'), ['sort' => $sortCount])) }}">
                         Кількість клубів @if($currentSort === 'teamsCount') ↑ @elseif($currentSort === '-teamsCount') ↓ @endif
@@ -82,7 +82,7 @@
             @forelse ($blogs as $blog)
                 <tr>
                     <td>{{ $blog->title }}</td>
-                    <td>{{ $blog->category?->category_name ?? '—' }}</td> <!-- Виведення пов'язаних даних[cite: 28] -->
+                    <td>{{ $blog->category?->category_name ?? '—' }}</td> {{-- Виведення пов'язаних даних --}}
                     <td>
                         @forelse ($blog->teams as $team)
                             <span class="badge bg-success">{{ $team->name }}</span>
@@ -90,9 +90,11 @@
                             <span class="text-muted">Немає</span>
                         @endforelse
                     </td>
-                    <td class="text-center">{{ $blog->teams_count }}</td> <!-- Результат withCount()[cite: 33] -->
+                    <td class="text-center">{{ $blog->teams_count }}</td> {{-- Результат withCount() --}}
                     <td>
-                        <a href="{{ route('blog.edit', $blog->blog_id) }}" class="btn btn-sm btn-warning">Редагувати</a>
+                        @can('update', $blog)
+                            <a href="{{ route('blog.edit', $blog->blog_id) }}" class="btn btn-sm btn-warning">Редагувати</a>
+                        @endcan
                     </td>
                 </tr>
             @empty
@@ -103,7 +105,7 @@
             </tbody>
         </table>
 
-        //Пагінація
+        {{-- Пагінація --}}
         <div class="mt-3">
             {{ $blogs->links() }}
         </div>

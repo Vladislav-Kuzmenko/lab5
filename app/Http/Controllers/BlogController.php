@@ -10,6 +10,7 @@ use App\Models\Team;
 use App\Queries\BlogFilter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Gate;
 
 class BlogController extends Controller
 {
@@ -25,7 +26,7 @@ class BlogController extends Controller
         return view('blog.index', compact('blogs', 'lang'));
     }
 
-    // Оновлений метод admin()
+    // Метод admin()
     public function admin(Request $request, BlogFilter $filter)
     {
         // Валідація вхідних GET-параметрів
@@ -51,6 +52,8 @@ class BlogController extends Controller
 
     public function create()
     {
+        Gate::authorize('create', Blog::class);
+
         return view('blog.create', [
             'categories' => Category::orderBy('category_name')->pluck('category_name', 'category_id'),
             'teams' => Team::orderBy('name')->pluck('name', 'id'),
@@ -60,6 +63,8 @@ class BlogController extends Controller
 
     public function store(BlogRequest $request)
     {
+        Gate::authorize('create', Blog::class);
+
         $data = $request->validated();
 
         $blog = Blog::create(
@@ -101,6 +106,8 @@ class BlogController extends Controller
 
     public function edit(Blog $blog)
     {
+        Gate::authorize('update', $blog);
+
         $blog->load(['translations', 'teams']);
 
         return view('blog.edit', [
@@ -114,6 +121,8 @@ class BlogController extends Controller
 
     public function update(BlogRequest $request, Blog $blog)
     {
+        Gate::authorize('update', $blog);
+
         $data = $request->validated();
 
         $blog->update(Arr::only($data, ['title', 'description', 'text', 'category_id']));
@@ -145,6 +154,8 @@ class BlogController extends Controller
 
     public function teamsEdit(Blog $blog)
     {
+        Gate::authorize('update', $blog);
+
         return view('blog.teams', [
             'blog' => $blog,
             'teams' => Team::orderBy('name')->pluck('name', 'id'),
@@ -154,6 +165,8 @@ class BlogController extends Controller
 
     public function teamsStore(Request $request, Blog $blog)
     {
+        Gate::authorize('update', $blog);
+
         $data = $request->validate([
             'teams' => ['sometimes', 'array'],
             'teams.*' => ['integer', 'distinct', 'exists:teams,id'],
@@ -166,6 +179,8 @@ class BlogController extends Controller
 
     public function destroy(Blog $blog)
     {
+        Gate::authorize('delete', $blog);
+
         $blog->delete();
 
         return redirect()->route('blog.admin')->with('success', 'Запис видалено!');

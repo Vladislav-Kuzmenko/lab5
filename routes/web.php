@@ -5,11 +5,8 @@ use App\Http\Controllers\CountryController;
 use App\Http\Controllers\FootballClubController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\BlogController;
-<<<<<<< Updated upstream
-=======
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CabinetController;
->>>>>>> Stashed changes
 
 Route::get('/', function () {
     return redirect()->route('clubs.index');
@@ -36,8 +33,6 @@ Route::resource('blog', BlogController::class);
 
 // Сторінка контактів
 Route::view('/contacts', 'contacts')->name('contacts');
-<<<<<<< Updated upstream
-=======
 
 // ЗАХИЩЕНІ МАРШРУТИ
 Route::middleware('auth')->group(function () {
@@ -74,4 +69,3 @@ Route::middleware('auth')->group(function () {
 
 // Маршрути автентифікації Breeze
 require __DIR__.'/auth.php';
->>>>>>> Stashed changes

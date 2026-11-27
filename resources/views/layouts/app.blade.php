@@ -14,14 +14,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
     <div class="container">
         <a class="navbar-brand fw-bold" href="{{ route('clubs.index') }}">⚽ УПЛ Довідник</a>
-<<<<<<< Updated upstream
-        <div class="navbar-nav">
-            <a class="nav-link {{ request()->routeIs('country.*') ? 'active' : '' }}" href="{{ route('country.index') }}">Країни</a>
-            <a class="nav-link {{ request()->routeIs('clubs.*') ? 'active' : '' }}" href="{{ route('clubs.index') }}">Футбольні клуби</a>
-            <a class="nav-link {{ request()->routeIs('stats.*') ? 'active' : '' }}" href="{{ route('stats.pages') }}">Статистика</a>
-            <a class="nav-link {{ request()->routeIs('blog.*') ? 'active' : '' }}" href="{{ route('blog.index') }}">Блог / Новини</a>
-            <a class="nav-link {{ request()->routeIs('contacts') ? 'active' : '' }}" href="{{ route('contacts') }}">Контакти</a>
-=======
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -57,7 +49,6 @@
                     <a class="btn btn-primary btn-sm" href="{{ route('register') }}">Реєстрація</a>
                 @endguest
             </div>
->>>>>>> Stashed changes
         </div>
     </div>
 </nav>
@@ -81,10 +72,7 @@
     </div>
 </footer>
 
-<<<<<<< Updated upstream
-=======
 <!-- Bootstrap 5 JS Bundle -->
->>>>>>> Stashed changes
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
